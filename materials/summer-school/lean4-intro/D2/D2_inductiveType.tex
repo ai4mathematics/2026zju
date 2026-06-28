@@ -1,0 +1,715 @@
+﻿\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{LeanKeyword}{RGB}{0,76,153}
+\definecolor{LeanComment}{RGB}{90,110,90}
+\definecolor{LeanString}{RGB}{150,70,40}
+\definecolor{CodeBg}{RGB}{248,248,248}
+
+\lstdefinelanguage{Lean}{
+  morekeywords={
+    import,namespace,end,section,variable,universe,inductive,structure,class,
+    instance,where,def,theorem,example,by,match,with,fun,let,if,then,else,
+    deriving,Type,Prop
+  },
+  sensitive=true,
+  morecomment=[l]--,
+  morestring=[b]"
+}
+
+\lstdefinestyle{leanstyle}{
+  language=Lean,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{LeanKeyword}\bfseries,
+  commentstyle=\color{LeanComment},
+  stringstyle=\color{LeanString},
+  backgroundcolor=\color{CodeBg},
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  framerule=0.2pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\lstset{style=leanstyle}
+
+\newcommand{\DTwoPartName}{Overview}
+\newcommand{\setDTwoPart}[1]{\gdef\DTwoPartName{#1}}
+\newcommand{\leanfile}[1]{\vfill{\small\color{gray}Live Lean: \texttt{#1}}}
+\newcommand{\partlink}[2]{\hyperlink{#1}{\textcolor{LeanKeyword}{\textbf{#2}}}}
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.30\paperwidth,ht=2.6ex,dp=1ex,leftskip=1em]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\DTwoPartName
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.50\paperwidth,ht=2.6ex,dp=1ex,center]{title in head/foot}%
+      \usebeamerfont{title in head/foot}\insertshorttitle
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.20\paperwidth,ht=2.6ex,dp=1ex,rightskip=1em plus1fil]{date in head/foot}%
+      \usebeamerfont{date in head/foot}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}%
+  }%
+  \vskip0pt%
+}
+
+\title[D2: Inductive Types and Classes]{D2: Inductive Types and Classes}
+\subtitle{Constructors, recursion, induction, structures, and type classes}
+\author{Summer School on Lean}
+\date{July 14, Tuesday}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Learning Goals}
+  
+
+  \begin{itemize}
+    \item read simple \texttt{inductive}, \texttt{structure}, and \texttt{class} declarations;
+    \item predict the cases of a pattern match from the constructors of a type;
+    \item recognize the shape of recursive definitions and induction proofs;
+    \item use basic examples of \texttt{Option}, \texttt{List}, \texttt{Fin}, and \texttt{Multiset};
+    \item understand what \texttt{instance} search and \texttt{deriving} are for.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Four-Part Outline}
+  \begin{tabular}{@{}p{0.18\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    Part I & \partlink{part-inductive}{Inductive} \\
+           & Motivation and basic \texttt{inductive} declarations \\
+    \midrule
+    Part II & \partlink{part-recursion-induction}{Recursion and Induction} \\
+            & Pattern matching, recursion, \texttt{cases}, and \texttt{induction} \\
+    \midrule
+    Part III & \partlink{part-structures-apis}{Structures and APIs} \\
+             & \texttt{structure}, \texttt{Option}, \texttt{List}, \texttt{Fin}, \texttt{Multiset} \\
+    \midrule
+    Part IV & \partlink{part-type-classes}{Type Classes} \\
+            & \texttt{class}, \texttt{instance}, \texttt{deriving}, and an integrated expression example \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Timing}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Time & Topic \\
+    \midrule
+    0--35 min & Part I: Inductive \\
+    35--80 min & Part II: Recursion and Induction \\
+    80--100 min & Break \\
+    100--145 min & Part III: Structures and APIs \\
+    145--180 min & Part IV: Type Classes \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\setDTwoPart{Part I: Inductive}
+\section{Motivation}
+
+\begin{frame}{Data Built from Constructors}
+  \hypertarget{part-inductive}{}
+  Many Lean types are described by listing their constructors:
+
+  \begin{itemize}
+    \item \texttt{Bool}: \texttt{true}, \texttt{false}
+    \item \texttt{Nat}: \texttt{zero}, \texttt{succ}
+    \item \texttt{Option alpha}: \texttt{none}, \texttt{some a}
+    \item \texttt{List alpha}: \texttt{[]}, \texttt{x :: xs}
+  \end{itemize}
+
+  Knowing how values are built tells us how to compute with them and how to prove statements about them.
+\end{frame}
+
+\begin{frame}[fragile]{Weekday}
+  \begin{lstlisting}
+inductive Weekday where
+  | mon | tue | wed | thu | fri | sat | sun
+  deriving Repr, BEq, DecidableEq
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{Weekday} is a new type with seven constructors.
+    \item The constructors are the only ways to build a \texttt{Weekday}.
+    \item \texttt{deriving} generates printing and equality automatically.
+  \end{itemize}
+\end{frame}
+
+\section{Inductive Types}
+
+\begin{frame}{Reading an Inductive Declaration}
+  When you encounter an \texttt{inductive} declaration, ask:
+
+  \begin{enumerate}
+    \item What is the new type?
+    \item What are the constructors?
+    \item Which constructors carry data?
+    \item Which constructors are recursive?
+  \end{enumerate}
+
+  These four answers predict the shape of pattern matches, recursive definitions, and induction proofs over the type.
+
+  \leanfile{code/D2\_Inductive.lean}
+\end{frame}
+
+\begin{frame}[fragile]{Constructors Are Functions}
+  \begin{lstlisting}
+inductive MyNat where
+  | zero : MyNat
+  | succ : MyNat -> MyNat
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{zero} is already a natural number.
+    \item \texttt{succ} needs a smaller natural number before it produces a new one.
+    \item Use \texttt{\#check} to inspect constructor types.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Parameters vs. Constructor Arguments}
+  \begin{lstlisting}
+inductive MyOption (alpha : Type) where
+  | none : MyOption alpha
+  | some : alpha -> MyOption alpha
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{alpha} is a parameter of the whole family of types.
+    \item \texttt{some} stores one particular value of type \texttt{alpha}.
+    \item Examples: \texttt{MyOption Nat}, \texttt{MyOption String}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Recursive Constructors}
+  \begin{lstlisting}
+inductive MyNat where
+  | zero : MyNat
+  | succ : MyNat -> MyNat
+
+inductive MyList (alpha : Type) where
+  | nil : MyList alpha
+  | cons : alpha -> MyList alpha -> MyList alpha
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item Recursive constructors mention the type being defined.
+    \item The recursive argument is the smaller object.
+    \item This is why structural recursion and induction follow the same shape.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Addition on MyNat}
+  \begin{lstlisting}
+def MyNat.add : MyNat -> MyNat -> MyNat
+  | m, zero => m
+  | m, succ n => succ (MyNat.add m n)
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The two equations follow the two constructors of \texttt{MyNat}.
+    \item Recursion is on the second argument: \texttt{succ n} reduces to \texttt{n}.
+    \item These are the familiar recursive equations \(m + 0 = m\) and \(m + (n+1) = (m+n)+1\).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Tree}
+  \begin{lstlisting}
+inductive Tree (alpha : Type) where
+  | leaf : alpha -> Tree alpha
+  | node : Tree alpha -> Tree alpha -> Tree alpha
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item A leaf stores one value.
+    \item A node stores two subtrees of the same type.
+    \item In the node case of an induction proof there are two induction hypotheses, one per subtree.
+  \end{itemize}
+\end{frame}
+
+\setDTwoPart{Part II: Recursion and Induction}
+\section{Pattern Matching and Recursion}
+
+\begin{frame}{Part II: Recursion and Induction}
+  \hypertarget{part-recursion-induction}{}
+  Constructors are used in two more ways:
+
+  \begin{itemize}
+    \item pattern matching to inspect a value of an inductive type;
+    \item structural recursion to define functions over recursive data.
+  \end{itemize}
+
+  Induction proofs then follow the same case structure as these definitions.
+\end{frame}
+
+\begin{frame}[fragile]{Pattern Matching}
+  \begin{lstlisting}
+def isWeekend : Weekday -> Bool
+  | Weekday.sat => true
+  | Weekday.sun => true
+  | _ => false
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item Pattern matching eliminates an inductive value.
+    \item Each branch handles one possible constructor shape.
+    \item The wildcard pattern \texttt{\_} handles remaining cases.
+  \end{itemize}
+
+  \leanfile{code/D2\_PatternMatching.lean}
+\end{frame}
+
+\begin{frame}[fragile]{Matching on Option}
+  \begin{lstlisting}
+def getWithDefault {alpha : Type}
+    (default : alpha) : Option alpha -> alpha
+  | none => default
+  | some a => a
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The \texttt{none} branch has no stored value.
+    \item The \texttt{some} branch exposes the stored value.
+    \item The return type is the same in both branches.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Recursive Definitions on Natural Numbers}
+  \begin{lstlisting}
+def add (m : Nat) : Nat -> Nat
+  | 0 => m
+  | n + 1 => add m n + 1
+
+def mul (m : Nat) : Nat -> Nat
+  | 0 => 0
+  | n + 1 => mul m n + m
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The recursion is on the second argument.
+    \item The equations are ordinary recursive mathematical definitions.
+    \item Powers can be defined in the same style.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Recursive Definitions on Lists}
+  \begin{lstlisting}
+def myLength {alpha : Type} : List alpha -> Nat
+  | [] => 0
+  | _ :: xs => myLength xs + 1
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The recursive call is made on \texttt{xs}, a smaller list.
+    \item Lean accepts this as structural recursion.
+    \item The two branches match the two list constructors.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Map on Lists}
+  \begin{lstlisting}
+def myMap {alpha beta : Type} (f : alpha -> beta) :
+    List alpha -> List beta
+  | [] => []
+  | x :: xs => f x :: myMap f xs
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The empty list maps to the empty list.
+    \item The \texttt{cons} branch applies \texttt{f} to the head and recurses on the tail.
+    \item The output list has the same length as the input list.
+  \end{itemize}
+\end{frame}
+
+\section{Induction Proofs}
+
+\begin{frame}{From Recursion to Induction}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Data & Program & Proof \\
+    \midrule
+    base constructor & base branch & base case \\
+    recursive constructor & recursive call & induction hypothesis \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.8em}
+
+  A function definition on an inductive type and an induction proof over that type share the same case structure.
+\end{frame}
+
+\begin{frame}[fragile]{Proof by Cases}
+  \begin{lstlisting}
+example (b : Bool) : b = true \/ b = false := by
+  cases b <;> simp
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{cases} splits a value according to its constructors.
+    \item It is best for small or non-recursive inductive types.
+  \end{itemize}
+
+  \leanfile{code/D2\_InductionProofs.lean}
+\end{frame}
+
+\begin{frame}[fragile]{Induction on Lists}
+  \begin{lstlisting}
+theorem append_nil_right {alpha : Type} (xs : List alpha) :
+    xs ++ [] = xs := by
+  induction xs with
+  | nil =>
+      rfl
+  | cons x xs ih =>
+      rw [ih]
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The base case is the empty list.
+    \item The step case is \texttt{x :: xs}.
+    \item The induction hypothesis is the theorem already known for \texttt{xs}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Induction on Addition}
+  \begin{lstlisting}
+theorem zero_add (n : Nat) : add 0 n = n := by
+  induction n with
+  | zero =>
+      rfl
+  | succ n ih =>
+      calc
+        add 0 (n + 1) = add 0 n + 1 := rfl
+        _ = n + 1 := by rw [ih]
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The base case proves the statement for \texttt{0}.
+    \item The step case uses the induction hypothesis for \texttt{n}.
+    \item This is the familiar proof of a recursive equation by induction.
+  \end{itemize}
+\end{frame}
+
+\setDTwoPart{Break}
+\section{Break}
+
+\begin{frame}{Break}
+  \begin{center}
+    \Huge 20-minute break
+  \end{center}
+
+  
+
+  
+\end{frame}
+
+\setDTwoPart{Part III: Structures and APIs}
+\section{Structures}
+
+\begin{frame}{Part III: Structures and APIs}
+  \hypertarget{part-structures-apis}{}
+  Three topics:
+
+  \begin{itemize}
+    \item \texttt{structure}: an inductive type with one constructor and named fields;
+    \item the standard inductive types \texttt{Option}, \texttt{List}, \texttt{Fin}, \texttt{Multiset};
+    \item how each one supports a different modeling choice.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Structures as Records}
+  \begin{lstlisting}
+structure Vector2 where
+  x : Int
+  y : Int
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item A structure bundles named fields.
+    \item Values can be constructed with record syntax.
+    \item Fields can be accessed with dot notation.
+  \end{itemize}
+
+  \leanfile{code/D2\_Structure.lean}
+\end{frame}
+
+\begin{frame}[fragile]{Operations on a Structure}
+  \begin{lstlisting}
+def Vector2.add (u v : Vector2) : Vector2 :=
+  { x := u.x + v.x, y := u.y + v.y }
+
+def Vector2.dot (u v : Vector2) : Int :=
+  u.x * v.x + u.y * v.y
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{u.x} and \texttt{u.y} access coordinates.
+    \item Record syntax constructs new vectors from field values.
+    \item This mirrors ordinary coordinate definitions in linear algebra.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Bundling Data with a Property}
+  \begin{lstlisting}
+structure PointOnDiagonal where
+  x : Int
+  y : Int
+  onDiagonal : x = y
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item Structures can contain data fields and proof fields.
+    \item The field \texttt{onDiagonal} records a mathematical property.
+    \item This pattern is common in formalized mathematics.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Inductive vs. Structure}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Tool & Typical use & Shape \\
+    \midrule
+    \texttt{inductive} & alternatives, recursive data & one or more constructors \\
+    \texttt{structure} & bundled fields & one constructor with named fields \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{1em}
+
+  Many mathematical objects in Lean are represented as structures.
+\end{frame}
+
+\section{Common Inductive Types}
+
+\begin{frame}{Common Inductive Types}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Type & Meaning & Typical use \\
+    \midrule
+    \texttt{Option alpha} & a value or nothing & partial lookup \\
+    \texttt{List alpha} & finite ordered data & recursion and iteration \\
+    \texttt{Fin n} & a natural number below \texttt{n} & safe indexing \\
+    \texttt{Multiset alpha} & unordered data with multiplicity & finite combinatorics \\
+    \bottomrule
+  \end{tabular}
+
+  \leanfile{code/D2\_CommonTypes.lean}
+\end{frame}
+
+\begin{frame}[fragile]{Option}
+  \begin{lstlisting}
+def safeHead {alpha : Type} : List alpha -> Option alpha
+  | [] => none
+  | x :: _ => some x
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item The return type signals that the lookup may have no result.
+    \item Any caller has to handle both \texttt{none} and \texttt{some}.
+    \item Partiality is recorded in the type, not in a side channel.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{List}
+  Common library operations on \texttt{List alpha}:
+
+  \begin{itemize}
+    \item \texttt{map}: transform each element;
+    \item \texttt{filter}: keep elements satisfying a predicate;
+    \item \texttt{foldl}, \texttt{foldr}: accumulate values from left or right;
+    \item \texttt{length}, \texttt{++} (append), \texttt{mem}.
+  \end{itemize}
+
+  Each operation packages a standard recursive pattern over \texttt{nil} and \texttt{cons}.
+\end{frame}
+
+\begin{frame}[fragile]{Fin n}
+  \begin{lstlisting}
+#check Fin 3
+#check (0 : Fin 3)
+#check (2 : Fin 3)
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item An element of \texttt{Fin n} is a natural number together with a proof that it is less than \texttt{n}.
+    \item Writing \texttt{(3 : Fin 3)} is a type error.
+    \item \texttt{Fin n} is the standard index type for vectors, matrices, and finite choices.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Multiset}
+  \begin{itemize}
+    \item A \texttt{List alpha} remembers order; \texttt{[1, 2, 1]} and \texttt{[1, 1, 2]} are different lists.
+    \item A \texttt{Multiset alpha} forgets order but remembers multiplicity; the same two examples are equal as multisets.
+    \item \texttt{Multiset} is defined in mathlib using \texttt{List} quotiented by permutation.
+  \end{itemize}
+\end{frame}
+
+\setDTwoPart{Part IV: Type Classes}
+\section{Type Classes}
+
+\begin{frame}{From Structures to Classes}
+  \hypertarget{part-type-classes}{}
+  \begin{itemize}
+    \item A \texttt{structure} bundles data and operations into one type.
+    \item A \texttt{class} is a structure whose instances Lean searches for automatically.
+    \item A parameter written as \texttt{[C alpha]} asks Lean to supply a \texttt{C alpha} instance at every call site.
+    \item This is how \texttt{+}, \texttt{*}, and algebraic structure work uniformly across many types.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A Small Type Class}
+  \begin{lstlisting}
+class HasNorm (alpha : Type) where
+  norm : alpha -> Nat
+
+def doubleNorm [HasNorm alpha] (x : alpha) : Nat :=
+  2 * HasNorm.norm x
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{[HasNorm alpha]} is a type class parameter.
+    \item Lean tries to synthesize the instance automatically.
+  \end{itemize}
+
+  \leanfile{code/D2\_Typeclass.lean}
+\end{frame}
+
+\begin{frame}[fragile]{Instances}
+  \begin{lstlisting}
+structure Vector2 where
+  x : Int
+  y : Int
+
+instance : HasNorm Vector2 where
+  norm v := v.x.natAbs + v.y.natAbs
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item An \texttt{instance} provides the data a class requires for a particular type.
+    \item Once registered, the instance is found automatically wherever \texttt{[HasNorm Vector2]} is required.
+    \item \texttt{Int.natAbs} sends an integer to its absolute value as a \texttt{Nat}.
+    \item Use \texttt{\#synth HasNorm Vector2} to ask Lean what it found.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Add and Mul as Classes}
+  \begin{lstlisting}
+#synth Add Nat
+#synth Add Int
+#synth Mul Nat
+#synth Mul Int
+
+def addThree [Add alpha] (a b c : alpha) : alpha :=
+  a + b + c
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{+} is the method of the class \texttt{Add}; \texttt{*} is the method of \texttt{Mul}.
+    \item \texttt{addThree} works for any \texttt{alpha} with an \texttt{Add} instance.
+    \item Built-in instances exist for \texttt{Nat} and \texttt{Int}; mathlib adds many more.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Mathlib: Algebraic Instances}
+  \begin{lstlisting}
+import Mathlib
+
+#synth Add Nat
+#synth Add Int
+#synth Add Rat
+#synth Add Complex
+
+#synth Ring Int
+#synth Field Rat
+#synth Field Complex
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item Mathlib provides a rich algebraic hierarchy.
+    \item Lean can find instances for familiar number systems.
+    \item This is why generic algebraic theorems can apply broadly.
+  \end{itemize}
+
+  \leanfile{code/D2\_Typeclass\_Mathlib.lean}
+\end{frame}
+
+\begin{frame}{Classes for Mathematical Structure}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Class & Purpose \\
+    \midrule
+    \texttt{Add}, \texttt{Mul} & notation for operations \\
+    \texttt{Zero}, \texttt{One} & distinguished elements \\
+    \texttt{Semigroup}, \texttt{Monoid} & associative operations, identity \\
+    \texttt{Group} & inverse operation \\
+    \texttt{Ring}, \texttt{CommRing} & ring structure \\
+    \texttt{Field} & field structure \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Operations vs.\ Laws}
+  \begin{itemize}
+    \item \texttt{[Add alpha]} supplies only the operation \texttt{+ : alpha -> alpha -> alpha}.
+    \item It does not by itself give associativity, commutativity, or an identity.
+    \item For those laws, use stronger classes: \texttt{AddCommMonoid alpha}, \texttt{Ring alpha}, \texttt{Field alpha}.
+    \item A theorem stated with \texttt{[Ring R]} applies to every type for which Lean can find a \texttt{Ring} instance.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Deriving}
+  \begin{lstlisting}
+inductive Color where
+  | red | green | blue
+  deriving Repr, BEq, DecidableEq
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item \texttt{deriving} generates standard instances.
+    \item It makes custom types usable in small examples immediately.
+  \end{itemize}
+\end{frame}
+
+\section{Integrated Example}
+
+\begin{frame}[fragile]{Expression Trees}
+  \begin{lstlisting}
+inductive Expr where
+  | const : Nat -> Expr
+  | add : Expr -> Expr -> Expr
+  | var : String -> Expr
+  deriving Repr, BEq, DecidableEq
+  \end{lstlisting}
+
+  Syntax trees are naturally inductive.
+
+  \leanfile{code/D2\_IntegratedExample.lean}
+\end{frame}
+
+\begin{frame}{Exercises}
+  \begin{itemize}
+    \item Complete the guided holes in \texttt{D2\_Exercises.lean}.
+    \item Add a \texttt{mul : Expr -> Expr -> Expr} constructor to \texttt{Expr}.
+    \item Extend \texttt{eval} and \texttt{vars} to the new constructor.
+    \item Prove \texttt{nodeCount (mirror e) = nodeCount e} by induction on \texttt{e}.
+  \end{itemize}
+
+  \leanfile{code/D2\_Exercises.lean}
+\end{frame}
+
+\end{document}
