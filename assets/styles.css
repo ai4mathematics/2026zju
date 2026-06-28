@@ -423,6 +423,25 @@ h1, h2, h3, h4 {
 .track ul.teachers .name { font-weight: 600; color: var(--ink); }
 .track ul.teachers .affil { color: var(--ink-mute); font-size: 0.88rem; }
 
+.track .track-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 0;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+.track .track-cta {
+  margin: var(--space-2) 0 0;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-align: right;
+}
+.track--alt .track-cta { color: var(--accent-warm); }
+.track:hover .track-cta { text-decoration: underline; }
+
 /* Info grid for organizers / facts */
 .info-grid {
   display: grid;
