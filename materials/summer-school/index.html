@@ -248,10 +248,180 @@
       <div class="section-head">
         <div>
           <p class="eyebrow">提高班 · Lean4 的元编程</p>
-          <h2 class="h-section">材料</h2>
+          <h2 class="h-section">课程提纲</h2>
         </div>
+        <p class="lede">
+          主题：<strong>Lean Meta for Hackers</strong>。面向已熟悉 Lean 用法、写过简单 tactic、希望深入理解机制的学员。
+          每日 14:00–17:00 两个半场（14:00–15:30 / 15:45–17:15）；上午 9:00–12:00 为 final project 推进时间，三位教师轮值答疑。
+        </p>
       </div>
-      <p class="muted">课件将在课程进行时陆续上传。</p>
+
+      <ol class="course-schedule">
+        <li><span class="date">D1 · 7/13 周一</span><span class="title">设计哲学与入门</span><a class="status" href="#a-d1">↓ 当日提纲</a></li>
+        <li><span class="date">D2 · 7/14 周二</span><span class="title">MetaM + Kernel 实操 / LSP / 项目规划</span><a class="status" href="#a-d2">↓ 当日提纲</a></li>
+        <li><span class="date">D3 · 7/15 周三</span><span class="title">Parser + Elab + Delab 合体</span><a class="status" href="#a-d3">↓ 当日提纲</a></li>
+        <li><span class="date">D4 · 7/16 周四</span><span class="title">Tactic 日 + Class 系统深入</span><a class="status" href="#a-d4">↓ 当日提纲</a></li>
+        <li><span class="date">D5 · 7/17 周五</span><span class="title">AI × Lean + 编译器与版本控制</span><a class="status" href="#a-d5">↓ 当日提纲</a></li>
+        <li><span class="date">D6 · 7/20 周一</span><span class="title">扩展机制 + 收尾</span><a class="status" href="#a-d6">↓ 当日提纲</a></li>
+        <li><span class="date">汇报 · 7/21 周二</span><span class="title">小组 final project 展示</span><span class="status">—</span></li>
+      </ol>
+
+      <article class="lecture-card" id="a-d1">
+        <p class="eyebrow">D1 · 7 月 13 日（周一）</p>
+        <h3>设计哲学与入门</h3>
+        <p class="lecture-summary">
+          从依赖类型论的基本设计抉择出发，讲清 Expr 七构造子、Class 系统、Kernel
+          可信基、reducibility 四档、三条计算路径与 Monad 栈分层背后的“为什么”；下半场进入 Expr、Level、Name、metavariable
+          的实操，并写第一段 notation。
+        </p>
+        <div class="lecture-files">
+          <div>
+            <h4>上半场 · 14:00–15:30</h4>
+            <ul>
+              <li><span class="lean-name">Lean 的设计哲学</span><span class="lean-desc">依赖类型论 / CIC / inductive type family；Expr 七构造子的由来；Class 系统动机；Kernel trusted base；reducibility 与三条计算路径；Monad 栈分层</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>下半场 · 15:45–17:15</h4>
+            <ul>
+              <li><span class="lean-name">Expr 快速过 + notation 入门</span><span class="lean-desc">Expr 七构造子速览、Level / Name、三种变量（de Bruijn / FVarId / MVarId）、metavariable、<code>notation</code> / <code>infix</code> / <code>macro</code> / <code>macro_rules</code>；实战写第一个中缀运算符</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="lecture-card" id="a-d2">
+        <p class="eyebrow">D2 · 7 月 14 日（周二）</p>
+        <h3>MetaM + Kernel 实操 / LSP / 项目规划</h3>
+        <p class="lecture-summary">
+          上半场把 MetaM 核心 API、LCtx、metavariable 操作、Quote/反引用、reducibility 四档与 isDefEq
+          全部跑一遍，并对照源码手写一个 whnf 玩具；下半场进入 LSP 协议、infoview 与 lean4game 架构，并完成 final project 选题与分组细化。
+        </p>
+        <div class="lecture-files">
+          <div>
+            <h4>上半场 · 14:00–15:30</h4>
+            <ul>
+              <li><span class="lean-name">MetaM + Kernel 实操</span><span class="lean-desc"><code>mkFreshMVar</code> / <code>whnf</code> / <code>inferType</code> / <code>isDefEq</code> / <code>mkAppM</code>；LCtx、occurs check、Quote 与 <code>q(...)</code>；reducibility 四档与 <code>withReducible</code>；手写 whnf 玩具；decide / #reduce / native_decide 对比</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>下半场 · 15:45–17:15</h4>
+            <ul>
+              <li><span class="lean-name">LSP / infoview / lean4game + 项目规划</span><span class="lean-desc">LSP 协议与 <code>Lean.Server.*</code> 源码导览；infoview 渲染与消息推送；lean4game 自定义 infoview；final project 选题确认与技术导师分配</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="lecture-card" id="a-d3">
+        <p class="eyebrow">D3 · 7 月 15 日（周三）</p>
+        <h3>Parser + Elab + Delab 合体</h3>
+        <p class="lecture-summary">
+          打通从字面语法到内部 Expr、再反向回到屏幕上的完整链条：Pratt parser、卫生宏机制、TSyntax，
+          以及双向类型检查、higher-order pattern unification、postponed elaboration 与自定义 delab。
+        </p>
+        <div class="lecture-files">
+          <div>
+            <h4>上半场 · 14:00–15:30</h4>
+            <ul>
+              <li><span class="lean-name">Parser 与语法层</span><span class="lean-desc">Pratt parser 原理；Syntax 节点结构；卫生宏（<code>MonadRef</code> / <code>Syntax.Ident.scope</code>）；<code>syntax</code> / <code>macro</code> vs <code>notation</code>；TSyntax；带 binder 的 notation 实战</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>下半场 · 15:45–17:15</h4>
+            <ul>
+              <li><span class="lean-name">Elaborator 与 Delab</span><span class="lean-desc">TermElabM 与双向类型检查；expected type 传递；higher-order pattern unification；<code>elab</code> / <code>elab_rules</code>；postponed elaboration；macro vs elab 边界；delab / PrettyPrinter 实战</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="lecture-card" id="a-d4">
+        <p class="eyebrow">D4 · 7 月 16 日（周四）</p>
+        <h3>Tactic 日 + Class 系统深入</h3>
+        <p class="lecture-summary">
+          上半场拆开 tactic 自动化的底层基础设施：EnvExtension、DiscrTree、simp / grind 完整内部与扩展接口；
+          下半场聚焦 synthInstance 算法、outParam、diamond 与 Mathlib 代数 hierarchy 的设计回扣，并做性能 profiling 实战。
+        </p>
+        <div class="lecture-files">
+          <div>
+            <h4>上半场 · 14:00–15:30</h4>
+            <ul>
+              <li><span class="lean-name">Tactic 基础设施与自动化设计</span><span class="lean-desc">TacticM 与目标管理；EnvExtension（Persistent / Scoped）；DiscrTree 数据结构；simp 完整内部（rewrite + congruence closure + discharger + 索引 + 扩展接口）；grind 完整内部；AI 辅助 tactic（LeanDojo / ReProver）</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>下半场 · 15:45–17:15</h4>
+            <ul>
+              <li><span class="lean-name">Class 系统深入</span><span class="lean-desc">synthInstance（tabled resolution、discrimination tree、缓存、回溯）；outParam / semiOutParam；priority；diamond / coherence；Mathlib 代数 hierarchy 回扣；<code>trace.Meta.synthInstance</code> + <code>maxHeartbeats</code> 性能 profiling</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="lecture-card" id="a-d5">
+        <p class="eyebrow">D5 · 7 月 17 日（周五）</p>
+        <h3>AI × Lean + 编译器与版本控制</h3>
+        <p class="lecture-summary">
+          上半场剖析 lean4-skills 的 Plan → Work → Checkpoint → Review → Replan 循环、与 LSP 的对接，以及 Archon
+          plan-prover-review 架构在 Lean 里的映射；下半场进入编译器后端、.olean / Lake 增量编译、版本兼容策略。
+        </p>
+        <div class="lecture-files">
+          <div>
+            <h4>上半场 · 14:00–15:30</h4>
+            <ul>
+              <li><span class="lean-name">AI × Lean</span><span class="lean-desc"><a href="https://github.com/cameronfreer/lean4-skills/" target="_blank" rel="noopener">lean4-skills</a> 架构剖析：循环引擎、draft / formalize / prove / autoprove / golf 工作流；<code>lean-lsp-mcp</code> 对接；Archon 分析；auto-formalization、tactic prediction、proof reconstruction 现状</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>下半场 · 15:45–17:15</h4>
+            <ul>
+              <li><span class="lean-name">编译器 + 编译模型 + 版本控制（≥1h）</span><span class="lean-desc">Expr → LCNF → IR → C / native；<code>@[implemented_by]</code> / extern / specialization；.olean 文件格式与 Lake 增量编译；<code>precompileModule</code>；.olean vs C vs native 的可信度与性能；Mathlib rolling release；<code>#guard</code> / <code>#guard_msgs</code>；跨版本兼容策略</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="lecture-card" id="a-d6">
+        <p class="eyebrow">D6 · 7 月 20 日（周一）</p>
+        <h3>扩展机制 + 收尾</h3>
+        <p class="lecture-summary">
+          上半场覆盖 attribute、<code>to_additive</code>、deriving handler、autoParam、initialize 与 unsafe 边界；下半场做
+          6 天内容回顾与关联图，给 final project 做最后冲刺指导，并梳理 Lean 元编程社区生态的入门路径。
+        </p>
+        <div class="lecture-files">
+          <div>
+            <h4>上半场 · 14:00–15:30</h4>
+            <ul>
+              <li><span class="lean-name">扩展机制</span><span class="lean-desc">Attribute 系统（<code>@[simp]</code> / <code>@[instance]</code> / 自定义 attribute）；<code>to_additive</code> 风格代码生成；deriving 机制详解（<code>mkDeriving</code>、自定义 handler、<code>BEq</code> / <code>Hashable</code> / <code>Repr</code> / <code>DecidableEq</code>）；autoParam；<code>initialize</code> 与模块生命周期；unsafe 代码边界</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>下半场 · 15:45–17:15</h4>
+            <ul>
+              <li><span class="lean-name">全局收尾</span><span class="lean-desc">6 天内容回顾与关联图；final project 冲刺指导；Lean 元编程社区生态导航（去哪里读源码、如何参与贡献、值得深挖的方向）；Q&amp;A</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">提高班 · Final Project</p>
+          <h2 class="h-section">课程汇报形式</h2>
+        </div>
+        <p class="lede">
+          小组形式，每组<strong>最多 4 人</strong>，实现一个 non-trivial 的 mini-automation——
+          syntax + elab + tactic + reconstruction 覆盖完整链条。可选方向包括
+          mini-linarith / mini-norm_num / mini-decide / 嵌入式 DSL 等。
+          7/21（周二）上午集中展示。
+        </p>
+      </div>
+      <p class="muted">课件与代码将在课程进行时陆续上传。</p>
     </div>
   </section>
 </main>
