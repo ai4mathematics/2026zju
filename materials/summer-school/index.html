@@ -80,6 +80,49 @@
   border-bottom-color: transparent;
 }
 .lecture-files li a:hover { border-bottom-color: var(--accent); }
+
+.course-schedule {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-3) 0 var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-elev);
+}
+.course-schedule li {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr auto;
+  gap: clamp(0.6rem, 0.4rem + 1vw, 1.2rem);
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--rule);
+  align-items: baseline;
+  font-size: 0.94rem;
+}
+.course-schedule li:first-child { border-top: 0; }
+.course-schedule .date {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+.course-schedule .title { color: var(--ink); }
+.course-schedule .status {
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+.course-schedule a.status {
+  color: var(--accent);
+  border-bottom-color: transparent;
+}
+.course-schedule a.status:hover { border-bottom-color: var(--accent); }
+@media (max-width: 640px) {
+  .course-schedule li {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
 </style>
 </head>
 <body>
@@ -120,7 +163,17 @@
         </div>
       </div>
 
-      <article class="lecture-card">
+      <ol class="course-schedule">
+        <li><span class="date">D1 · 7/13 周一</span><span class="title">从零到逻辑 + AI 工具上手</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D2 · 7/14 周二</span><span class="title">归纳类型与类型类</span><a class="status" href="#d2">↓ 查看材料</a></li>
+        <li><span class="date">D3 · 7/15 周三</span><span class="title">代数结构 + 组合/图</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D4 · 7/16 周四</span><span class="title">分析结构与拓扑</span><a class="status" href="#d4">↓ 查看材料</a></li>
+        <li><span class="date">D5 · 7/17 周五</span><span class="title">函数式编程</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D6 · 7/20 周一</span><span class="title">算法的形式化与验证</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">汇报 · 7/21 周二</span><span class="title">小组项目展示</span><span class="status">—</span></li>
+      </ol>
+
+      <article class="lecture-card" id="d2">
         <p class="eyebrow">D2 · 7 月 14 日（周二）</p>
         <h3>归纳类型与类型类</h3>
         <p class="lecture-summary">
@@ -155,7 +208,7 @@
         </div>
       </article>
 
-      <article class="lecture-card">
+      <article class="lecture-card" id="d4">
         <p class="eyebrow">D4 · 7 月 16 日（周四）</p>
         <h3>分析结构与拓扑</h3>
         <p class="lecture-summary">
