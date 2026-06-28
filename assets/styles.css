@@ -351,6 +351,8 @@ h1, h2, h3, h4 {
 
 .track {
   position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-elev);
   border: 1px solid var(--rule);
   border-radius: 14px;
@@ -358,6 +360,29 @@ h1, h2, h3, h4 {
   overflow: hidden;
   transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
 }
+
+a.track {
+  color: inherit;
+  text-decoration: none;
+}
+
+.track-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--rule);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  transition: gap 200ms ease, color 200ms ease;
+}
+
+.track--alt .track-cta { color: var(--accent-warm); }
+.track:hover .track-cta { gap: 0.8rem; }
 
 .track::before {
   content: "";
