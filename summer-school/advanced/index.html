@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>提高班 · Lean4 的元编程 · 2026 AI4Math 暑期学校</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a1814'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='ui-monospace,Menlo' font-size='18' fill='%23b8860b'%3E%CE%BB%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../assets/styles.css">
+<style>
+.lecture-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: clamp(1.4rem, 1rem + 1.2vw, 2rem);
+  margin-top: var(--space-3);
+  position: relative;
+  overflow: hidden;
+}
+.lecture-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0.85;
+}
+.lecture-card .eyebrow { margin-bottom: 0.3rem; }
+.lecture-card h3 {
+  font-size: clamp(1.4rem, 1.05rem + 0.8vw, 1.85rem);
+  margin: 0.1rem 0 0.6rem;
+}
+.lecture-card .lecture-summary {
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-3) 0;
+  max-width: 70ch;
+}
+.lecture-files {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  border-top: 1px dashed var(--rule);
+  padding-top: var(--space-3);
+}
+@media (max-width: 820px) {
+  .lecture-files { grid-template-columns: 1fr; }
+}
+.lecture-files h4 {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin: 0 0 0.6rem 0;
+  font-weight: 600;
+}
+.lecture-files ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lecture-files li {
+  padding: 0.35rem 0;
+  border-bottom: 1px dotted var(--rule);
+  font-size: 0.96rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.lecture-files li:last-child { border-bottom: 0; }
+.lecture-files .lean-name {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+}
+.lecture-files .lean-desc {
+  color: var(--ink-mute);
+  font-size: 0.88rem;
+}
+.lecture-files li a {
+  border-bottom-color: transparent;
+}
+.lecture-files li a:hover { border-bottom-color: var(--accent); }
+
+.course-schedule {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-3) 0 var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-elev);
+}
+.course-schedule li {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr auto;
+  gap: clamp(0.6rem, 0.4rem + 1vw, 1.2rem);
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--rule);
+  align-items: baseline;
+  font-size: 0.94rem;
+}
+.course-schedule li:first-child { border-top: 0; }
+.course-schedule .date {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+.course-schedule .title { color: var(--ink); }
+.course-schedule .status {
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+.course-schedule a.status {
+  color: var(--accent);
+  border-bottom-color: transparent;
+}
+.course-schedule a.status:hover { border-bottom-color: var(--accent); }
+@media (max-width: 640px) {
+  .course-schedule li {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark">λ</span>
+      <span>AI4Math · ZJU 2026</span>
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="../../index.html">首页</a></li>
+        <li><a href="../../summer-school.html" class="is-active">暑期学校</a></li>
+        <li><a href="../../workshop.html">研讨会</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">提高班 · 2026 AI4Math 暑期学校</p>
+      <h1 class="hero-title">Lean4 的元编程</h1>
+      <p class="lede" style="max-width: 56ch; margin-top: 1.4rem;">
+        提高班的讲义、幻灯片与 Lean 代码示例。<a href="../../summer-school.html">← 返回暑校页</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="h-section">材料</h2>
+        </div>
+      </div>
+
+      <ol class="course-schedule">
+        <li><span class="date">D1 · 7/13 周一</span><span class="title">设计哲学 · Expr 入门 + notation</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D2 · 7/14 周二</span><span class="title">MetaM + Kernel 实操 · LSP/infoview + 项目规划</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D3 · 7/15 周三</span><span class="title">Parser + Elab + Delab 合体</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D4 · 7/16 周四</span><span class="title">Tactic 基础设施 · Class 系统深入</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D5 · 7/17 周五</span><span class="title">AI × Lean · 编译器后端与版本控制</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D6 · 7/20 周一</span><span class="title">扩展机制 · 全局收尾</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">汇报 · 7/21 周二</span><span class="title">小组 final project 展示</span><span class="status">—</span></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container colophon">
+    <span>© 2026 浙江大学数学高等研究院</span>
+    <span>λ</span>
+  </div>
+</footer>
+
+</body>
+</html>
