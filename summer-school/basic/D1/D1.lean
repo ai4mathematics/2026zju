@@ -50,6 +50,21 @@ namespace S33B04
 
 end S33B04
 
+-- TYPE CONVERSION DEMO
+namespace TypeConversionDemo
+
+def count : Nat := 5
+
+-- Nat -> Int is lossless, so Lean can use a registered coercion.
+#check (count : Int)
+#eval (count : Int) - 7
+
+-- Int -> Nat may lose information and must be requested explicitly.
+#eval Int.toNat (-3)
+#eval Int.toNat 5
+
+end TypeConversionDemo
+
 -- SLIDE 34 BLOCK 05
 namespace S34B05
 
@@ -377,6 +392,25 @@ open Nat
 #check Nat.zero_add
 
 end S24CB29
+
+-- MATHLIB SEARCH DEMO
+namespace MathlibSearchDemo
+
+-- Query a known declaration name.
+#check Nat.add_comm
+#print Nat.add_comm
+
+-- Search for declarations whose type has a given shape. Run this on demand:
+-- #find ∀ n : Nat, n + 0 = n
+
+-- Search from the current goal and let Lean propose a checked declaration.
+example (a b : Nat) : a + b = b + a := by
+  exact?
+
+example (a : Nat) : a + 0 = a := by
+  simp?
+
+end MathlibSearchDemo
 
 -- SLIDE 44A BLOCK 30
 namespace S44AB30
