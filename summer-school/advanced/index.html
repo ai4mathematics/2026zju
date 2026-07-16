@@ -107,6 +107,16 @@
   white-space: nowrap;
 }
 .course-schedule .title { color: var(--ink); }
+.course-schedule .topic {
+  display: block;
+  font-weight: 600;
+}
+.course-schedule .description {
+  margin: 0.18rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
 .course-schedule .status {
   font-size: 0.85rem;
   color: var(--ink-mute);
@@ -163,8 +173,22 @@
       </div>
 
       <ol class="course-schedule">
-        <li><span class="date">D1 · 7/15 周三</span><span class="title">设计哲学 · Expr 入门 + notation</span><span class="status">课件将在课程进行时上传</span></li>
-        <li><span class="date">D2 · 7/16 周四</span><span class="title">MetaM + Kernel 实操 · LSP/infoview + 项目规划</span><span class="status">课件将在课程进行时上传</span></li>
+        <li>
+          <span class="date">D1 · 7/15 周三</span>
+          <div class="title">
+            <span class="topic">函数式编程基础</span>
+            <p class="description">介绍归纳类型与模式匹配、以值表示失败、I/O、可证明终止的递归及 Monad，为后续在 Lean 中构建定理证明器奠定基础。</p>
+          </div>
+          <a class="status" href="https://initial-algebra.net/zju-26-07/" target="_blank" rel="noopener">查看讲义</a>
+        </li>
+        <li>
+          <span class="date">D2 · 7/16 周四</span>
+          <div class="title">
+            <span class="topic">Lean 前端与元编程流程</span>
+            <p class="description">梳理源代码经解析、CommandElabM、TermElabM 与 MetaM/CoreM 服务转换为内核可检查 Expr 的过程，并介绍 TacticM。</p>
+          </div>
+          <span class="status">课件将在课程进行时上传</span>
+        </li>
         <li><span class="date">D3 · 7/17 周五</span><span class="title">Parser + Elab + Delab 合体</span><span class="status">课件将在课程进行时上传</span></li>
         <li><span class="date">D4 · 7/18 周六</span><span class="title">Tactic 基础设施 · Class 系统深入</span><span class="status">课件将在课程进行时上传</span></li>
         <li><span class="date">D5 · 7/19 周日</span><span class="title">AI × Lean · 编译器后端与版本控制</span><span class="status">课件将在课程进行时上传</span></li>
