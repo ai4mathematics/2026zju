@@ -1,5 +1,7 @@
 import Mathlib
 
+/-! Requires a configured Mathlib Lake project; see `README.md` in this folder. -/
+
 /-!
 # LeanZju D3 Demo
 
@@ -46,6 +48,60 @@ example (a b : ℤ) : (a + b) ^ 2 = a ^ 2 + 2 * a * b + b ^ 2 := by
   ring
 
 /-!
+### Structure inheritance with `extends`
+
+`class Child extends Parent` reuses the fields of `Parent` and creates a parent
+projection.  Mathlib registers these projections for typeclass search, so a
+child instance can satisfy a request for its parent interface.  The reverse
+direction is impossible unless the additional fields and proofs are supplied.
+-/
+
+section Extends
+
+#check AddSemigroup.toAdd
+#check AddMonoid.toAddSemigroup
+#check AddMonoid.toAddZeroClass
+
+example (G : Type*) [AddSemigroup G] : Add G := by
+  infer_instance
+
+example (G : Type*) [AddMonoid G] : AddSemigroup G := by
+  infer_instance
+
+example (G : Type*) [AddMonoid G] : AddZeroClass G := by
+  infer_instance
+
+end Extends
+
+/-!
+### The `Group` class in Mathlib
+
+The multiplicative hierarchy continues as `Monoid`, `DivInvMonoid`, and then
+`Group`. Thus a `Group G` supplies the parent interfaces automatically.
+`Group.inv_mul_cancel` is the stored field, while `inv_mul_cancel` is the
+public theorem used in ordinary proofs.
+-/
+
+section GroupClass
+
+#check Monoid
+#check DivInvMonoid
+#check Group.toDivInvMonoid
+#check Group.inv_mul_cancel
+#check inv_mul_cancel
+
+example (G : Type*) [Group G] : Monoid G := by
+  infer_instance
+
+example (G : Type*) [Group G] : DivInvMonoid G := by
+  infer_instance
+
+example (G : Type*) [Group G] (a : G) : a⁻¹ * a = 1 := by
+  exact inv_mul_cancel a
+
+end GroupClass
+
+/-!
 ## 2. AddGroup versus Group
 
 `AddGroup` and `Group` express the same algebraic pattern with different
@@ -82,6 +138,188 @@ example (a : ℤ) : -a + a = 0 := by
   exact neg_add_cancel a
 
 end AddGroupVsGroup
+
+/-!
+### From `Add` to `AddGroup` in the actual Mathlib hierarchy
+
+The low-level classes separate notation and computational fields from the
+mathematical laws.  The recommended constructor `AddGroup.ofLeftAxioms` fills
+the default subtraction and scalar-multiplication fields after three proofs.
+-/
+
+section FromAddToAddGroup
+
+#check Add
+#check AddSemigroup
+#check AddZeroClass
+#check AddMonoid
+#check SubNegMonoid
+#check AddGroup
+#check AddGroup.ofLeftAxioms
+
+/-!
+#### `nsmul` and `zsmul`
+
+For an additive monoid, `nsmul` interprets `n • a` as repeated addition by a
+natural number. Once negation is available, `zsmul` extends this operation to
+integer coefficients. Storing both operations in the hierarchy ensures that
+different inheritance paths reuse definitionally the same scalar action.
+-/
+
+#check AddMonoid.nsmul
+#check nsmulRec
+#check zero_nsmul
+#check succ_nsmul
+#check SubNegMonoid.zsmul
+#check zsmulRec
+#check zero_zsmul
+#check negSucc_zsmul
+
+example (M : Type*) [AddMonoid M] : SMul ℕ M := by
+  infer_instance
+
+example (G : Type*) [SubNegMonoid G] : SMul ℤ G := by
+  infer_instance
+
+example : (3 : ℕ) • (5 : ℤ) = 15 := by
+  norm_num
+
+example : (-3 : ℤ) • (5 : ℤ) = -15 := by
+  norm_num
+
+/-!
+#### Instance diamonds
+
+An instance diamond occurs when typeclass search can synthesize the same
+data-carrying target class through two paths. Priorities can select a path, but
+they cannot make two recursive constructions definitionally equal. This bad
+hierarchy constructs natural scalar multiplication by two routes.
+-/
+
+namespace InstanceDiamondDemo
+
+class NsmulData (α : Type*) where
+  nsmul : ℕ → α → α
+
+class ZsmulData (α : Type*) where
+  zsmul : ℤ → α → α
+
+class BadAddMonoid (α : Type*) extends Add α, Zero α, NsmulData α
+
+class BadAddGroup (α : Type*) extends Add α, Zero α, Neg α
+
+def repeatAddRight {α : Type*} [Add α] [Zero α] : ℕ → α → α
+  | 0, _ => 0
+  | n + 1, x => x + repeatAddRight n x
+
+def repeatAddLeft {α : Type*} [Add α] [Zero α] : ℕ → α → α
+  | 0, _ => 0
+  | n + 1, x => repeatAddLeft n x + x
+
+instance groupToMonoid [BadAddGroup α] : BadAddMonoid α where
+  nsmul := repeatAddRight
+
+def groupZsmul {α : Type*} [BadAddGroup α] : ℤ → α → α
+  | Int.ofNat n, x => repeatAddLeft n x
+  | Int.negSucc n, x => -(repeatAddLeft n.succ x)
+
+instance groupToZsmul [BadAddGroup α] : ZsmulData α where
+  zsmul := groupZsmul
+
+instance (priority := 90) nsmulFromZsmul [ZsmulData α] : NsmulData α where
+  nsmul n x := ZsmulData.zsmul (n : ℤ) x
+
+@[ext]
+structure Token where
+  value : ℤ
+deriving Repr, DecidableEq
+
+instance : BadAddGroup Token where
+  add x y := ⟨x.value + y.value⟩
+  zero := ⟨0⟩
+  neg x := ⟨-x.value⟩
+
+#synth BadAddMonoid Token
+#synth ZsmulData Token
+#synth NsmulData Token
+
+#eval (repeatAddRight 2 (Token.mk 3)).value
+#eval (groupZsmul (2 : ℤ) (Token.mk 3)).value
+
+example (x : Token) :
+    repeatAddRight 2 x = groupZsmul (2 : ℤ) x := by
+  fail_if_success rfl
+  apply Token.ext
+  change x.value + (x.value + 0) = (0 + x.value) + x.value
+  simp
+
+end InstanceDiamondDemo
+
+/-!
+Mathlib stores `nsmul` in `AddMonoid` and reuses it along all inheritance
+paths. Consequently the scalar action is definitionally equal to the stored
+field, so the following equality closes with `rfl`.
+-/
+
+#synth SMul ℕ (Polynomial ℕ)
+
+example (n : ℕ) (p : Polynomial ℕ) :
+    AddMonoid.nsmul n p = n • p := by
+  rfl
+
+example (p : Polynomial ℕ) : (2 : ℕ) • p = p + p := by
+  simpa using two_nsmul p
+
+@[ext]
+structure WrappedInt where
+  val : ℤ
+
+instance : Add WrappedInt where
+  add a b := ⟨a.val + b.val⟩
+
+instance : Zero WrappedInt where
+  zero := ⟨0⟩
+
+instance : Neg WrappedInt where
+  neg a := ⟨-a.val⟩
+
+instance : AddGroup WrappedInt :=
+  AddGroup.ofLeftAxioms
+    (fun a b c => by
+      apply WrappedInt.ext
+      exact add_assoc a.val b.val c.val)
+    (fun a => by
+      apply WrappedInt.ext
+      exact zero_add a.val)
+    (fun a => by
+      apply WrappedInt.ext
+      exact neg_add_cancel a.val)
+
+#synth Add WrappedInt
+#synth AddSemigroup WrappedInt
+#synth AddZeroClass WrappedInt
+#synth AddMonoid WrappedInt
+#synth SubNegMonoid WrappedInt
+#synth AddGroup WrappedInt
+#synth AddCancelMonoid WrappedInt
+#synth SubtractionMonoid WrappedInt
+
+#check add_zero
+#check add_neg_cancel
+#check sub_self
+#check neg_add_rev
+#check add_left_cancel
+
+example (a b : WrappedInt) : a - b = a + -b := by
+  exact sub_eq_add_neg a b
+
+example (a : WrappedInt) : -a + a = 0 := by
+  exact neg_add_cancel a
+
+example (a : WrappedInt) : a + -a = 0 := by
+  exact add_neg_cancel a
+
+end FromAddToAddGroup
 
 /-!
 ## 3. Subtype: elements carrying a proof
@@ -163,7 +401,78 @@ example (a : Sign) : a⁻¹ * a = 1 := by
   exact inv_mul_cancel a
 
 /-!
-## 5. Subgroup: subtype plus group closure
+## 5. Group homomorphisms and the first isomorphism theorem
+
+The notation `G →* H` bundles a function with proofs that it preserves `1` and
+multiplication.  For groups, preservation of inverses and powers then follows.
+-/
+
+section GroupHomomorphisms
+
+variable {G H : Type*} [Group G] [Group H]
+
+def conjugationHom (g : G) : G →* G where
+  toFun x := g * x * g⁻¹
+  map_one' := by simp
+  map_mul' := by
+    intro x y
+    group
+
+example (g x y : G) : conjugationHom g (x * y) =
+    conjugationHom g x * conjugationHom g y := by
+  exact map_mul (conjugationHom g) x y
+
+example (f : G →* H) (x : G) : f x⁻¹ = (f x)⁻¹ := by
+  exact map_inv f x
+
+example (f : G →* H) (x : G) (n : ℤ) : f (x ^ n) = f x ^ n := by
+  exact map_zpow f x n
+
+example (f : G →* H) (x : G) : x ∈ f.ker ↔ f x = 1 := by
+  exact MonoidHom.mem_ker
+
+example (f : G →* H) (y : H) : y ∈ f.range ↔ ∃ x : G, f x = y := by
+  rfl
+
+example (f : G →* H) : (f.ker).Normal := by
+  infer_instance
+
+#check MonoidHom.ker
+#check MonoidHom.range
+#check QuotientGroup.quotientKerEquivRange
+
+end GroupHomomorphisms
+
+def modFiveHom : Multiplicative ℤ →* Multiplicative (ZMod 5) :=
+  (Int.castAddHom (ZMod 5)).toMultiplicative
+
+example (m n : Multiplicative ℤ) :
+    modFiveHom (m * n) = modFiveHom m * modFiveHom n := by
+  exact map_mul modFiveHom m n
+
+example (z : Multiplicative ℤ) :
+    z ∈ modFiveHom.ker ↔ ((5 : ℕ) : ℤ) ∣ z.toAdd := by
+  change ((z.toAdd : ℤ) : ZMod 5) = 0 ↔ ((5 : ℕ) : ℤ) ∣ z.toAdd
+  exact ZMod.intCast_zmod_eq_zero_iff_dvd z.toAdd 5
+
+theorem modFiveHom_surjective : Function.Surjective modFiveHom := by
+  change Function.Surjective ((Int.castAddHom (ZMod 5)).toMultiplicative)
+  intro y
+  obtain ⟨z, hz⟩ := ZMod.intCast_surjective y.toAdd
+  refine ⟨Multiplicative.ofAdd z, ?_⟩
+  apply Multiplicative.toAdd.injective
+  simpa using hz
+
+noncomputable def modFiveFirstIso :
+    Multiplicative ℤ ⧸ modFiveHom.ker ≃* modFiveHom.range :=
+  QuotientGroup.quotientKerEquivRange modFiveHom
+
+noncomputable def modFiveFirstIsoOntoCodomain :
+    Multiplicative ℤ ⧸ modFiveHom.ker ≃* Multiplicative (ZMod 5) :=
+  QuotientGroup.quotientKerEquivOfSurjective modFiveHom modFiveHom_surjective
+
+/-!
+## 6. Subgroup: subtype plus group closure
 
 A `Subgroup G` is a predicate on `G` together with proofs that it contains `1`
 and is closed under multiplication and inverse.  Its elements are subtypes, so
@@ -184,6 +493,68 @@ def oneSubgroup (G : Type*) [Group G] : Subgroup G where
     intro a ha
     rw [ha]
     simp
+
+def posSubgroup : Subgroup Sign where
+  carrier := {g | g = Sign.pos}
+  one_mem' := by
+    rfl
+  mul_mem' := by
+    intro a b ha hb
+    rw [ha, hb]
+    rfl
+  inv_mem' := by
+    intro a ha
+    rw [ha]
+    rfl
+
+/-!
+`group_1` and `group_2` live on different types.  To regard the first group as
+a subgroup of the second, we give an injective homomorphism and take its range.
+The multiplicative operation on these tagged types is addition underneath.
+-/
+
+def IntegerGroup := Multiplicative ℤ
+def RationalGroup := Multiplicative ℚ
+
+instance group_1 : Group IntegerGroup := Multiplicative.group
+instance group_2 : Group RationalGroup := Multiplicative.group
+
+def intToRat : IntegerGroup →* RationalGroup :=
+  show Multiplicative ℤ →* Multiplicative ℚ from
+    (Int.castAddHom ℚ).toMultiplicative
+
+example (m n : IntegerGroup) :
+    intToRat (m * n) = intToRat m * intToRat n := by
+  exact map_mul intToRat m n
+
+theorem intToRat_injective : Function.Injective intToRat := by
+  change Function.Injective ((Int.castAddHom ℚ).toMultiplicative)
+  intro m n h
+  apply Multiplicative.toAdd.injective
+  have h' : (m.toAdd : ℚ) = (n.toAdd : ℚ) := by
+    simpa using congrArg Multiplicative.toAdd h
+  exact_mod_cast h'
+
+def integerRange : Subgroup RationalGroup := intToRat.range
+
+example : Group integerRange := by
+  infer_instance
+
+noncomputable def group_1_as_subgroup : IntegerGroup ≃* intToRat.range :=
+  MonoidHom.ofInjective intToRat_injective
+
+#check Subgroup.subtype
+#check MonoidHom.range
+#check MonoidHom.ofInjective
+
+example : Sign.pos ∈ posSubgroup := by
+  rfl
+
+example (x : posSubgroup) : (x : Sign) = Sign.pos := by
+  exact x.property
+
+example : Group posSubgroup := by
+  infer_instance
 
 example (G : Type*) [Group G] : (1 : G) ∈ oneSubgroup G := by
   exact (oneSubgroup G).one_mem
@@ -316,6 +687,8 @@ end RingSubstructures
 
 A field is a commutative ring with nontriviality and inverses for nonzero
 elements.  Here we wrap the rational numbers and transport the field structure.
+For a field, `mul_inv_cancel₀` and `inv_mul_cancel₀` carry the nonzero
+hypothesis; the un-suffixed `mul_inv_cancel` belongs to an ordinary `Group`.
 -/
 
 @[ext]
@@ -340,11 +713,18 @@ instance : Field WrappedQ := equivRat.field
 
 #synth Field WrappedQ
 #check mul_inv_cancel₀
+#check inv_mul_cancel₀
 #check inv_zero
 #check div_eq_mul_inv
 
 #eval (({ val := 3 } : WrappedQ) + { val := 4 }).val
 #eval (({ val := 3 } : WrappedQ) / { val := 2 }).val
+
+example (x : WrappedQ) (hx : x ≠ 0) : x * x⁻¹ = 1 := by
+  exact mul_inv_cancel₀ hx
+
+example (x : WrappedQ) (hx : x ≠ 0) : x⁻¹ * x = 1 := by
+  exact inv_mul_cancel₀ hx
 
 example (x : WrappedQ) (hx : x ≠ 0) : x / x = 1 := by
   field_simp [hx]
@@ -483,6 +863,15 @@ noncomputable def yComponent
   Classical.choose
     ((Classical.choose_spec (exists_decomposition F W P w)).2)
 
+omit [Fintype F] [FiniteDimensional F W] in
+lemma yComponent_mem
+    (P : CompletePolarization F W ω) (w : W) :
+    yComponent F W ω P w ∈ P.Y := by
+  dsimp [yComponent]
+  exact
+    (Classical.choose_spec
+      ((Classical.choose_spec (exists_decomposition F W P w)).2)).1
+
 
 #check xComponent F W ω P
 #check yComponent F W ω P
@@ -501,11 +890,48 @@ lemma decompose_by_components
 local notation "xComp" => xComponent F W ω P
 local notation "yComp" => yComponent F W ω P
 
+omit [Fintype F] [FiniteDimensional F W] in
 lemma xComponent_add (w1 w2 : W) :
     xComp (w1 + w2) = xComp w1 + xComp w2 := by
-    -- Advanced exercise: this requires extra uniqueness/linearity data for the
-    -- chosen decomposition.  We keep it as a classroom discussion point.
-    sorry
+  have hx12 : xComp (w1 + w2) ∈ P.X := xComponent_mem F W ω P (w1 + w2)
+  have hx1 : xComp w1 ∈ P.X := xComponent_mem F W ω P w1
+  have hx2 : xComp w2 ∈ P.X := xComponent_mem F W ω P w2
+  have hy12 : yComp (w1 + w2) ∈ P.Y := yComponent_mem F W ω P (w1 + w2)
+  have hy1 : yComp w1 ∈ P.Y := yComponent_mem F W ω P w1
+  have hy2 : yComp w2 ∈ P.Y := yComponent_mem F W ω P w2
+  have hsum :
+      xComp (w1 + w2) + yComp (w1 + w2) =
+        (xComp w1 + xComp w2) + (yComp w1 + yComp w2) := by
+    calc
+      xComp (w1 + w2) + yComp (w1 + w2) = w1 + w2 :=
+        (decompose_by_components F W ω P (w1 + w2)).symm
+      _ = (xComp w1 + yComp w1) + (xComp w2 + yComp w2) := by
+        exact congrArg₂ (· + ·)
+          (decompose_by_components F W ω P w1)
+          (decompose_by_components F W ω P w2)
+      _ = (xComp w1 + xComp w2) + (yComp w1 + yComp w2) := by
+        abel
+  let z := xComp (w1 + w2) - (xComp w1 + xComp w2)
+  have hzX : z ∈ P.X := P.X.sub_mem hx12 (P.X.add_mem hx1 hx2)
+  have hz_eq : z = (yComp w1 + yComp w2) - yComp (w1 + w2) := by
+    dsimp [z]
+    calc
+      xComp (w1 + w2) - (xComp w1 + xComp w2) =
+          (xComp (w1 + w2) + yComp (w1 + w2)) -
+            ((xComp w1 + xComp w2) + (yComp w1 + yComp w2)) +
+              ((yComp w1 + yComp w2) - yComp (w1 + w2)) := by
+        abel
+      _ = (yComp w1 + yComp w2) - yComp (w1 + w2) := by
+        rw [hsum]
+        simp
+  have hzY : z ∈ P.Y := by
+    rw [hz_eq]
+    exact P.Y.sub_mem (P.Y.add_mem hy1 hy2) hy12
+  have hzBot : z ∈ (⊥ : Submodule F W) :=
+    P.disjoint.le_bot ⟨hzX, hzY⟩
+  have hz0 : z = 0 := by
+    simpa using hzBot
+  exact sub_eq_zero.mp hz0
 
 /-！
 My version
@@ -860,6 +1286,24 @@ example {α : Type*} [Add α] [LE α] [AddLeftMono α]
     {a b : α} (h : a ≤ b) (c : α) :
     c + a ≤ c + b := by
   exact add_le_add_right h c
+
+example {R : Type*} [CommRing R] (a b c d : R)
+    (h1 : c = d * a + b) (h2 : b = a * d) :
+    c = 2 * a * d := by
+  rw [h1, h2]
+  ring
+
+example (x y : ℝ) (h1 : x + y = 10) (h2 : x - y = 4) : x = 7 := by
+  linarith
+
+example (n : Nat) : (Finset.range n).card = n := by
+  exact?
+
+example {G : Type*} [Group G] (a : G) : a⁻¹ * a = 1 := by
+  apply?
+
+example (n : Nat) : (Finset.range (n + 1)).card = n + 1 := by
+  simp?
 
 end AIExamples
 

@@ -1,5 +1,7 @@
 import Mathlib
 
+/-! Requires a configured Mathlib Lake project; see `README.md` in this folder. -/
+
 /-!
 # D3_15_AI_Examples
 
@@ -92,6 +94,32 @@ example {α : Type*} [Add α] [LE α] [AddLeftMono α]
     {a b : α} (h : a ≤ b) (c : α) :
     c + a ≤ c + b := by
   exact add_le_add_right h c
+
+/-!
+Successful AI drafts should still expose the algebraic structure and use a
+small, checkable tactic step.
+-/
+
+example {R : Type*} [CommRing R] (a b c d : R)
+    (h1 : c = d * a + b) (h2 : b = a * d) :
+    c = 2 * a * d := by
+  rw [h1, h2]
+  ring
+
+example (x y : ℝ) (h1 : x + y = 10) (h2 : x - y = 4) : x = 7 := by
+  linarith
+
+/-! Search tactics are useful during development; the comments show the
+stable proof they discover. -/
+
+example (n : Nat) : (Finset.range n).card = n := by
+  exact?
+
+example {G : Type*} [Group G] (a : G) : a⁻¹ * a = 1 := by
+  apply?
+
+example (n : Nat) : (Finset.range (n + 1)).card = n + 1 := by
+  simp?
 
 end AIExamples
 

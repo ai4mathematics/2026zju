@@ -1,5 +1,7 @@
 import Mathlib
 
+/-! Requires a configured Mathlib Lake project; see `README.md` in this folder. -/
+
 /-!
 # D3_04_Group_Instance
 

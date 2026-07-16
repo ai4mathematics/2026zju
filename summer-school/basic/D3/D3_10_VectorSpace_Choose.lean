@@ -1,5 +1,7 @@
 import Mathlib
 
+/-! Requires a configured Mathlib Lake project; see `README.md` in this folder. -/
+
 /-!
 # D3_10_VectorSpace_Choose
 
@@ -77,6 +79,15 @@ noncomputable def yComponent
   Classical.choose
     ((Classical.choose_spec (exists_decomposition F W P w)).2)
 
+omit [Fintype F] [FiniteDimensional F W] in
+lemma yComponent_mem
+    (P : CompletePolarization F W ω) (w : W) :
+    yComponent F W ω P w ∈ P.Y := by
+  dsimp [yComponent]
+  exact
+    (Classical.choose_spec
+      ((Classical.choose_spec (exists_decomposition F W P w)).2)).1
+
 
 #check xComponent F W ω P
 #check yComponent F W ω P
@@ -95,11 +106,48 @@ lemma decompose_by_components
 local notation "xComp" => xComponent F W ω P
 local notation "yComp" => yComponent F W ω P
 
+omit [Fintype F] [FiniteDimensional F W] in
 lemma xComponent_add (w1 w2 : W) :
     xComp (w1 + w2) = xComp w1 + xComp w2 := by
-    -- Advanced exercise: this requires extra uniqueness/linearity data for the
-    -- chosen decomposition.  We keep it as a classroom discussion point.
-    sorry
+  have hx12 : xComp (w1 + w2) ∈ P.X := xComponent_mem F W ω P (w1 + w2)
+  have hx1 : xComp w1 ∈ P.X := xComponent_mem F W ω P w1
+  have hx2 : xComp w2 ∈ P.X := xComponent_mem F W ω P w2
+  have hy12 : yComp (w1 + w2) ∈ P.Y := yComponent_mem F W ω P (w1 + w2)
+  have hy1 : yComp w1 ∈ P.Y := yComponent_mem F W ω P w1
+  have hy2 : yComp w2 ∈ P.Y := yComponent_mem F W ω P w2
+  have hsum :
+      xComp (w1 + w2) + yComp (w1 + w2) =
+        (xComp w1 + xComp w2) + (yComp w1 + yComp w2) := by
+    calc
+      xComp (w1 + w2) + yComp (w1 + w2) = w1 + w2 :=
+        (decompose_by_components F W ω P (w1 + w2)).symm
+      _ = (xComp w1 + yComp w1) + (xComp w2 + yComp w2) := by
+        exact congrArg₂ (· + ·)
+          (decompose_by_components F W ω P w1)
+          (decompose_by_components F W ω P w2)
+      _ = (xComp w1 + xComp w2) + (yComp w1 + yComp w2) := by
+        abel
+  let z := xComp (w1 + w2) - (xComp w1 + xComp w2)
+  have hzX : z ∈ P.X := P.X.sub_mem hx12 (P.X.add_mem hx1 hx2)
+  have hz_eq : z = (yComp w1 + yComp w2) - yComp (w1 + w2) := by
+    dsimp [z]
+    calc
+      xComp (w1 + w2) - (xComp w1 + xComp w2) =
+          (xComp (w1 + w2) + yComp (w1 + w2)) -
+            ((xComp w1 + xComp w2) + (yComp w1 + yComp w2)) +
+              ((yComp w1 + yComp w2) - yComp (w1 + w2)) := by
+        abel
+      _ = (yComp w1 + yComp w2) - yComp (w1 + w2) := by
+        rw [hsum]
+        simp
+  have hzY : z ∈ P.Y := by
+    rw [hz_eq]
+    exact P.Y.sub_mem (P.Y.add_mem hy1 hy2) hy12
+  have hzBot : z ∈ (⊥ : Submodule F W) :=
+    P.disjoint.le_bot ⟨hzX, hzY⟩
+  have hz0 : z = 0 := by
+    simpa using hzBot
+  exact sub_eq_zero.mp hz0
 
 /-！
 My version

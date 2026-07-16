@@ -1,5 +1,7 @@
 import Mathlib
 
+/-! Requires a configured Mathlib Lake project; see `README.md` in this folder. -/
+
 /-!
 # D3_08_Field_Instance
 
@@ -13,6 +15,8 @@ namespace LeanZjuD3.Ch08
 
 A field is a commutative ring with nontriviality and inverses for nonzero
 elements.  Here we wrap the rational numbers and transport the field structure.
+For a field, `mul_inv_cancel₀` and `inv_mul_cancel₀` carry the nonzero
+hypothesis; the un-suffixed `mul_inv_cancel` belongs to an ordinary `Group`.
 -/
 
 @[ext]
@@ -37,11 +41,18 @@ instance : Field WrappedQ := equivRat.field
 
 #synth Field WrappedQ
 #check mul_inv_cancel₀
+#check inv_mul_cancel₀
 #check inv_zero
 #check div_eq_mul_inv
 
 #eval (({ val := 3 } : WrappedQ) + { val := 4 }).val
 #eval (({ val := 3 } : WrappedQ) / { val := 2 }).val
+
+example (x : WrappedQ) (hx : x ≠ 0) : x * x⁻¹ = 1 := by
+  exact mul_inv_cancel₀ hx
+
+example (x : WrappedQ) (hx : x ≠ 0) : x⁻¹ * x = 1 := by
+  exact inv_mul_cancel₀ hx
 
 example (x : WrappedQ) (hx : x ≠ 0) : x / x = 1 := by
   field_simp [hx]
