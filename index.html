@@ -56,19 +56,6 @@
     </div>
   </section>
 
-        <div class="home-talk"><span>7/22 · 09:00</span><strong>AI for Mathematics: 数学智能体的设计与实践</strong><small>董彬 · 北京大学</small><p>人工智能正在推动数学研究范式演进，但数学研究的高度专业化、跨领域关联以及自然语言证明与机器可验证证明之间的鸿沟仍带来挑战。本报告将介绍围绕数学信息检索、检索增强、自动形式化与自动推理构建的一系列数学智能体，阐述其设计理念、系统架构与实践方法，并通过开放数学问题案例展示其在知识发现、问题形式化和推理探索中的作用。</p></div>
-        <div class="home-talk"><span>7/22 · 09:45</span><strong>智能数学推理：形式化与定理证明</strong><small>文再文 · 北京大学</small><p>本报告探讨数学形式化和自动定理证明的近期进展，包括面向大规模 Lean 库的前提选择、自动形式化框架、形式化证据与语义对齐，以及针对优化和数值分析建立的评测体系。报告还将介绍智能数学推理引擎 ReasLab，展示其在定理证明与科学写作中的一体化能力。</p></div>
-        <div class="home-talk"><span>7/22 · 10:50</span><strong>Paper2Formalization: Auto-Formalization of Research Papers</strong><small>梁经纬 · 上海交通大学</small><p>本报告介绍一个将数学研究论文自动形式化为 Lean 代码的智能体框架。系统包含由大模型监督的 OCR 智能体、基于知识图谱的规划智能体和自动形式化智能体；框架已在 30 篇优化理论论文上进行测试，并生成超过 11 万行代码的 Lean 库。</p></div>
-        <div class="home-talk"><span>7/22 · 13:30</span><strong>MechMath Agent Team: LLM Driven Agents for Mathematical Research</strong><small>曹一川 · 中国科学院</small><p>数学研究具有推导路径非线性、逻辑要求严格和探索周期长等特点。本报告介绍 MechMath Agent Team：一种由控制、执行和增强三个平面组成的多智能体架构，并由知识库管理、自然语言证明和形式语言证明智能体闭环协作。该系统已在数论、代数复杂性、微分代数、算子代数和不等式等开放问题上开展验证。</p></div>
-        <div class="home-talk"><span>7/22 · 14:00</span><strong>Formalization of Hierarchy of Local Rings in Lean4</strong><small>关乃粼 · 北京大学</small><p>本报告介绍交换代数中局部环层次结构在 Lean4 中的形式化，包括深度、Cohen–Macaulay 环、正则局部环、Gorenstein 环和完全交环等理论。项目形式化了 Auslander–Buchsbaum、Ischebeck 等定理，并通过构造正合函子诱导的 Ext 映射支持维数转移论证。</p></div>
-        <div class="home-talk"><span>7/22 · 14:30</span><strong>AI Proofs in PDEs</strong><small>徐霄乾 · 昆山杜克大学</small><p>本报告讨论人工智能在流体方程研究中得到的近期成果。内容首先介绍不可压缩流的混合性质与扩散过程及耗散增强之间的关系，随后讨论反混合现象以及特定流中 Batchelor scales 的存在性，这些结果均由人工智能辅助证明。</p></div>
-        <div class="home-talk"><span>7/22 · 15:20</span><strong>LeanAide: Extensible Autoformalization by Combinator Code Generation</strong><small>Ajay Kumar Nair · 印度科学学院</small><p>LeanAide 是一个面向 Lean 的开放、模块化和可扩展自动形式化系统。它使用不同处理器识别并转换数学构造，再通过“组合子代码生成”构造最终代码；系统主要以 Lean 编写，能够直接利用 Lean 元编程、规则自动化和大语言模型能力的持续改进。</p></div>
-        <div class="home-talk"><span>7/22 · 15:50</span><strong>MechMath: Sorrifier-Driven Formal Decomposition Workflow for Automated Theorem Proving</strong><small>邱瑞晨 · 中国科学院</small><p>复杂证明往往无法一次成功，而反复局部修复会导致上下文持续增长，完全重写又会浪费已有正确结果。MechMath 利用 Lean 的 sorry 占位符精确隔离未解决子目标，同时保留已验证的证明结构，并在独立、干净的上下文中逐个解决失败子问题。实验覆盖 IMO 2025、Putnam 2025、miniF2F 和 ProverBench 等基准。</p></div>
-        <div class="home-talk"><span>7/22 · 16:20</span><strong>Mathlib 类型类层次结构的设计</strong><small>赵雨扬 · 香港中文大学（深圳）</small><p>类型类是 mathlib 中广泛使用的重要机制，但随着层次结构不断加深和扩展，其设计与使用也面临复杂性。本报告将介绍类型类的组织方式，通过 diamond 等实例说明继承性能与建模问题，并讨论数学表达便利性、API 可维护性和效率之间的设计权衡。</p></div>
-        <div class="home-talk"><span>7/22 · 16:50</span><strong>Reap: 轻量、开放的 AlphaProof 复现</strong><small>王语同 · 至知科技</small><p>近年来，基于 MCTS 强化学习的自动定理证明系统取得显著进展。本报告介绍基于 reap tactic、在 Lean 中原生实现的高效证明搜索系统及其完整训练流程，并展示该系统在小模型和低预算条件下取得的性能与构建经验。</p></div>
-        <div class="home-talk"><span>7/23 · 09:00</span><strong>自然语言驱动的数学研究智能体——AIM 系统的探索与实践</strong><small>李鹏 · 清华大学</small><p>本报告回顾人工智能在数学研究中的发展脉络与代表性进展，分析 AI 面向研究级数学问题时面临的核心挑战。在此基础上，报告重点介绍自然语言驱动的数学研究智能体 AIM，展示其如何通过自然语言交互与智能体协作辅助数学问题探索、定理形成和可信验证。</p></div>
-        <div class="home-talk"><span>7/23 · 09:45</span><strong>大模型如何学会数学：从思维链到形式化证明</strong><small>李嘉 · Project Numina</small><p>本报告回顾大模型数学能力的发展历程：从 MATH、Minerva 等早期工作，到代码辅助推理、过程奖励模型、大规模合成数据，以及以 o1、DeepSeek-R1 为代表的长程推理和强化学习范式。结合 Project Numina 的实践，报告还将介绍 NuminaMath 数据集、开放模型训练和 Kimina Prover 中自然语言推理与 Lean 证明搜索的统一流程。</p></div>
-        <div class="home-talk"><span>7/23 · 10:50</span><strong>AI 大模型的创造性思维</strong><small>陈小杨 · 同济大学</small><p>本报告探讨人工智能大模型的创造性思维，重点讨论如何评价创造性、如何设计智能体探索创造性思维，以及如何构建能够进一步提升创造性思维能力的训练框架。</p></div>
 </main>
 
 <footer class="site-footer">
