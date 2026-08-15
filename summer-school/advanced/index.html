@@ -133,6 +133,15 @@
     gap: 0.2rem;
   }
 }
+
+.course-schedule .status-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: flex-end;
+  text-align: right;
+}
+.course-schedule .status-group .status { display: inline; }
 </style>
 </head>
 <body>
@@ -179,7 +188,7 @@
             <span class="topic">函数式编程基础</span>
             <p class="description">以 Lean 4 构造定理证明器为主线，介绍归纳类型与模式匹配、用值表示失败、I/O、可证明终止的递归，以及组织这些计算结构的 <code>Monad</code> 接口。</p>
           </div>
-          <a class="status" href="https://initial-algebra.net/zju-26-07/" target="_blank" rel="noopener">查看讲义</a>
+          <div class="status-group"><a class="status" href="https://initial-algebra.net/zju-26-07/" target="_blank" rel="noopener">查看讲义</a><a class="status" href="http://www.iasm.zju.edu.cn/2026/0716/c56659a3189322/page.htm" target="_blank" rel="noopener">🎥 IASM 回放 · 董安杰</a></div>
         </li>
         <li>
           <span class="date">D2 · 7/16 周四</span>
@@ -187,12 +196,12 @@
             <span class="topic">Lean 前端与元编程流程</span>
             <p class="description">追踪 Lean 源代码到内核可检查的 <code>Expr</code>：解析生成 <code>Syntax</code>，<code>CommandElabM</code> 更新环境，<code>TermElabM</code> 将项 elaboration 为 <code>Expr</code>，<code>MetaM</code>/<code>CoreM</code> 提供类型论服务，并以 <code>TacticM</code> 展示证明目标的 elaboration 状态。</p>
           </div>
-          <span class="status">课件将在课程进行时上传</span>
+          <div class="status-group"><span class="status">课件将在课程进行时上传</span><a class="status" href="http://www.iasm.zju.edu.cn/2026/0717/c56659a3189535/page.htm" target="_blank" rel="noopener">🎥 IASM 回放 · 徐天一</a></div>
         </li>
-        <li><span class="date">D3 · 7/17 周五</span><span class="title">Parser + Elab + Delab 合体</span><span class="status">课件将在课程进行时上传</span></li>
-        <li><span class="date">D4 · 7/18 周六</span><span class="title">Tactic 基础设施 · Class 系统深入</span><span class="status">课件将在课程进行时上传</span></li>
-        <li><span class="date">D5 · 7/19 周日</span><span class="title">AI × Lean · 编译器后端与版本控制</span><span class="status">课件将在课程进行时上传</span></li>
-        <li><span class="date">D6 · 7/20 周一</span><span class="title">扩展机制 · 全局收尾</span><span class="status">课件将在课程进行时上传</span></li>
+        <li><span class="date">D3 · 7/17 周五</span><span class="title">Parser + Elab + Delab 合体</span><div class="status-group"><span class="status">课件将在课程进行时上传</span><a class="status" href="http://www.iasm.zju.edu.cn/2026/0720/c56659a3190080/page.htm" target="_blank" rel="noopener">🎥 IASM 回放 · 董安杰</a></div></li>
+        <li><span class="date">D4 · 7/18 周六</span><span class="title">Tactic 基础设施 · Class 系统深入</span><div class="status-group"><span class="status">课件将在课程进行时上传</span><a class="status" href="http://www.iasm.zju.edu.cn/2026/0720/c56659a3190084/page.htm" target="_blank" rel="noopener">🎥 IASM 回放 · 徐天一</a></div></li>
+        <li><span class="date">D5 · 7/19 周日</span><span class="title">AI × Lean · 编译器后端与版本控制</span><div class="status-group"><span class="status">课件将在课程进行时上传</span><a class="status" href="http://www.iasm.zju.edu.cn/2026/0720/c56659a3190086/page.htm" target="_blank" rel="noopener">🎥 IASM 回放 · 董安杰</a></div></li>
+        <li><span class="date">D6 · 7/20 周一</span><span class="title">扩展机制 · 全局收尾</span><div class="status-group"><span class="status">课件将在课程进行时上传</span><a class="status" href="http://www.iasm.zju.edu.cn/2026/0721/c56659a3190213/page.htm" target="_blank" rel="noopener">🎥 IASM 回放 · 王语同</a></div></li>
         <li><span class="date">汇报 · 7/21 周二</span><span class="title">小组 final project 展示</span><span class="status">—</span></li>
       </ol>
     </div>
